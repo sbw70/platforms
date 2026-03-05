@@ -1,0 +1,29 @@
+{
+  "_schema": "artist-hub-v1",
+  "_note": "This file is owned and controlled by the artist. The platform reads it. Nothing else.",
+
+  "artist_name": "",
+  "act_name": "",
+  "contact_email": "",
+
+  "music_url": "",
+  "stream_url": "",
+  "merch_url": "",
+
+  "ticket_price_usd": 0.00,
+  "ticket_quantity": 0,
+  "purchase_limit_per_fan": 2,
+
+  "refund_policy": "",
+
+  "stripe_account_id": "",
+
+  "platform_fee_pct": 2.0,
+  "_fee_note": "2% covers Stripe passthrough and infra. Artist receives the rest.",
+
+  "hub_id": "",
+  "_hub_note": "Assigned at registration. Artist does not set this.",
+
+  "active": false,
+  "_active_note": "Set to true by artist when ready to go live."
+}
