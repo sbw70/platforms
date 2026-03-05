@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="page-title">Artist Hub</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+
+    :root {
+      --bg:       #0a0a0a;
+      --surface:  #111111;
+      --border:   #222222;
+      --text:     #e8e8e8;
+      --muted:    #555555;
+      --accent:   #c8f04a;
+      --danger:   #ff4444;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── noise grain overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.4;
+    }
+
+    /* ── layout ── */
+    .wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── header bar ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+    }
+
+    header .wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hub-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .hub-id {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── hero ── */
+    .hero {
+      padding: 80px 0 48px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .act-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(64px, 14vw, 120px);
+      line-height: 0.92;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 32px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .act-name span {
+      color: var(--accent);
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .meta-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .meta-value {
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .meta-value a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .meta-value a:hover {
+      text-decoration: underline;
+    }
+
+    /* ── sections ── */
+    section {
+      padding: 48px 0;
+      border-bottom: 1px solid var(--border);
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    /* ── ticket block ── */
+    .ticket-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ticket-block::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .ticket-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 56px;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .ticket-details {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.8;
+    }
+
+    .ticket-details span {
+      color: var(--text);
+    }
+
+    .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #0a0a0a;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 14px 32px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .btn:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--text);
+      opacity: 1;
+    }
+
+    .sold-out {
+      font-size: 13px;
+      color: var(--danger);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 14px 0;
+    }
+
+    /* ── music / merch links ── */
+    .link-row {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .link-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+      transition: color 0.15s ease;
+    }
+
+    .link-item:last-child {
+      border-bottom: none;
+    }
+
+    .link-item:hover {
+      color: var(--accent);
+    }
+
+    .link-item:hover .link-arrow {
+      transform: translateX(4px);
+    }
+
+    .link-name {
+      font-size: 14px;
+    }
+
+    .link-arrow {
+      font-size: 18px;
+      transition: transform 0.15s ease;
+    }
+
+    /* ── calendar ── */
+    .event-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .event-item {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+      transition: color 0.15s ease;
+    }
+
+    .event-item:last-child {
+      border-bottom: none;
+    }
+
+    .event-item:hover {
+      color: var(--accent);
+    }
+
+    .event-date {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      line-height: 1;
+      min-width: 60px;
+      color: var(--accent);
+    }
+
+    .event-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .event-title {
+      font-size: 14px;
+    }
+
+    .event-venue {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .no-events {
+      font-size: 13px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ── footer ── */
+    footer {
+      padding: 40px 0;
+    }
+
+    footer .wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-note {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .footer-note a {
+      color: var(--muted);
+      text-decoration: underline;
+    }
+
+    .refund-note {
+      font-size: 11px;
+      color: var(--muted);
+      max-width: 320px;
+      text-align: right;
+      line-height: 1.6;
+    }
+
+    /* ── inactive state ── */
+    .inactive-banner {
+      background: #1a0a00;
+      border: 1px solid #442200;
+      color: #ff8844;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 12px 20px;
+      margin-bottom: 32px;
+    }
+
+    /* ── animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── loading ── */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="loading" id="loading">loading...</div>
+
+  <div id="app" class="hidden">
+
+    <header>
+      <div class="wrap">
+        <span class="hub-label">Artist Hub</span>
+        <span class="hub-id" id="hub-id-display"></span>
+      </div>
+    </header>
+
+    <main>
+      <div class="wrap">
+
+        <!-- inactive warning -->
+        <div class="inactive-banner hidden" id="inactive-banner">
+          This hub is not yet live.
+        </div>
+
+        <!-- hero -->
+        <section class="hero" style="border-bottom: none; padding-bottom: 0;">
+          <h1 class="act-name" id="act-name">—</h1>
+          <div class="hero-meta" id="hero-meta"></div>
+        </section>
+
+        <!-- tickets -->
+        <section id="ticket-section">
+          <p class="section-label">Tickets</p>
+          <div class="ticket-block">
+            <div class="ticket-price" id="ticket-price">—</div>
+            <div class="ticket-details" id="ticket-details"></div>
+            <div id="ticket-action"></div>
+          </div>
+        </section>
+
+        <!-- music -->
+        <section id="music-section">
+          <p class="section-label">Music</p>
+          <div class="link-row">
+            <a class="link-item" id="music-link" href="#" target="_blank" rel="noopener">
+              <span class="link-name">Full discography</span>
+              <span class="link-arrow">→</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- merch -->
+        <section id="merch-section" class="hidden">
+          <p class="section-label">Merch</p>
+          <div class="link-row">
+            <a class="link-item" id="merch-link" href="#" target="_blank" rel="noopener">
+              <span class="link-name">Shop</span>
+              <span class="link-arrow">→</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- calendar -->
+        <section id="calendar-section">
+          <p class="section-label">Shows</p>
+          <div class="event-list" id="event-list">
+            <p class="no-events">No shows listed yet.</p>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <p class="footer-note">
+          Content owned and controlled by the artist.<br>
+          <a href="fan.html">Already have a ticket? Access your stream →</a>
+        </p>
+        <p class="refund-policy footer-note refund-note" id="refund-display"></p>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // ------------------------------------------------------------------
+    // Config loader
+    // Falls back to embedded demo config if no server is running.
+    // In production: serve via python3 -m http.server and pass
+    // ?config=configs/your-act.json
+    // ------------------------------------------------------------------
+
+    const DEMO_CONFIG = {
+      "_schema":                "artist-hub-v1",
+      "artist_name":            "Hollow Coast",
+      "act_name":               "Hollow Coast",
+      "music_url":              "https://bandcamp.com",
+      "stream_url":             "TBD",
+      "merch_url":              "https://bandcamp.com/merch",
+      "ticket_price_usd":       18.00,
+      "ticket_quantity":        300,
+      "purchase_limit_per_fan": 2,
+      "refund_policy":          "Full refund available up to 48 hours before show.",
+      "platform_fee_pct":       2.0,
+      "hub_id":                 "HUB_4A9F2C81B3E7",
+      "active":                 true,
+      "events": [
+        { "date": "2026-04-12", "title": "Late Show",       "venue": "The Roxy, Los Angeles",   "url": "#" },
+        { "date": "2026-05-03", "title": "Spring Tour",     "venue": "Elsewhere, Brooklyn",     "url": "#" },
+        { "date": "2026-06-20", "title": "Summer Festival", "venue": "Prospect Park, New York", "url": "#" }
+      ]
+    };
+
+    const params     = new URLSearchParams(window.location.search);
+    const configPath = params.get("config") || null;
+
+    async function loadConfig() {
+      if (configPath) {
+        try {
+          const res = await fetch(configPath);
+          if (res.ok) return res.json();
+        } catch (e) {}
+      }
+      return DEMO_CONFIG;
+    }
+
+    function formatPrice(usd) {
+      if (usd === 0) return "FREE";
+      return "$" + usd.toFixed(2);
+    }
+
+    function render(c) {
+      document.getElementById("page-title").textContent = c.act_name + " — Artist Hub";
+
+      // Hub ID
+      document.getElementById("hub-id-display").textContent = c.hub_id || "";
+
+      // Inactive warning
+      if (!c.active) {
+        document.getElementById("inactive-banner").classList.remove("hidden");
+      }
+
+      // Act name — break at last word for accent color
+      const words    = c.act_name.trim().split(" ");
+      const last     = words.pop();
+      const rest     = words.join(" ");
+      const nameEl   = document.getElementById("act-name");
+      nameEl.innerHTML = rest
+        ? `${rest} <span>${last}</span>`
+        : `<span>${c.act_name}</span>`;
+
+      // Hero meta
+      const meta = document.getElementById("hero-meta");
+      if (c.music_url) {
+        meta.innerHTML += metaItem("Music", `<a href="${c.music_url}" target="_blank" rel="noopener">Listen →</a>`);
+      }
+      if (c.stream_url && c.stream_url !== "TBD") {
+        meta.innerHTML += metaItem("Stream", `<a href="${c.stream_url}" target="_blank" rel="noopener">Watch →</a>`);
+      }
+      if (c.merch_url) {
+        meta.innerHTML += metaItem("Merch", `<a href="${c.merch_url}" target="_blank" rel="noopener">Shop →</a>`);
+      }
+
+      // Tickets
+      document.getElementById("ticket-price").textContent = formatPrice(c.ticket_price_usd);
+
+      const remaining = c.ticket_quantity; // live count would come from backend
+      document.getElementById("ticket-details").innerHTML =
+        `<span>${c.ticket_quantity}</span> tickets · <span>${c.purchase_limit_per_fan}</span> per fan`;
+
+      const actionEl = document.getElementById("ticket-action");
+      if (!c.active) {
+        actionEl.innerHTML = `<p class="sold-out">Not on sale yet</p>`;
+      } else if (remaining < 1) {
+        actionEl.innerHTML = `<p class="sold-out">Sold out</p>`;
+      } else {
+        actionEl.innerHTML = `<a class="btn" href="buy.html?config=${encodeURIComponent(configPath)}">Get tickets</a>`;
+      }
+
+      // Music link
+      if (c.music_url) {
+        document.getElementById("music-link").href = c.music_url;
+      }
+
+      // Merch
+      if (c.merch_url) {
+        document.getElementById("merch-section").classList.remove("hidden");
+        document.getElementById("merch-link").href = c.merch_url;
+      }
+
+      // Refund policy
+      if (c.refund_policy) {
+        document.getElementById("refund-display").textContent = c.refund_policy;
+      }
+
+      // Calendar — expects c.events as array of {date, title, venue, url}
+      // Artists add events directly to their config
+      const events  = c.events || [];
+      const listEl  = document.getElementById("event-list");
+      if (events.length > 0) {
+        listEl.innerHTML = events.map(ev => {
+          const d    = new Date(ev.date);
+          const mon  = d.toLocaleString("en-US", { month: "short" }).toUpperCase();
+          const day  = d.getDate();
+          return `
+            <a class="event-item" href="${ev.url || '#'}" target="_blank" rel="noopener">
+              <div class="event-date">${mon}<br>${day}</div>
+              <div class="event-info">
+                <span class="event-title">${ev.title}</span>
+                <span class="event-venue">${ev.venue || ''}</span>
+              </div>
+            </a>`;
+        }).join("");
+      }
+    }
+
+    function metaItem(label, value) {
+      return `<div class="meta-item">
+        <span class="meta-label">${label}</span>
+        <span class="meta-value">${value}</span>
+      </div>`;
+    }
+
+    // Boot
+    loadConfig()
+      .then(config => {
+        render(config);
+        document.getElementById("loading").classList.add("hidden");
+        document.getElementById("app").classList.remove("hidden");
+      })
+      .catch(err => {
+        document.getElementById("loading").textContent = "Could not load artist config.";
+        console.error(err);
+      });
+  </script>
+
+</body>
+</html>
