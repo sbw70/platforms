@@ -1,3 +1,18 @@
+#!/usr/bin/env python3
+# Copyright 2026 Seth Brian Wells
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """
 Stream gate.
 
@@ -87,6 +102,15 @@ def gate(ref: str, fan_email: str) -> bool:
         print()
         print("  This ticket was issued to a different address.")
         print("  Tickets are non-transferable.")
+        print()
+        return False
+
+    # Revocation check — before touching the artifact
+    if ticket.get("revoked"):
+        print("  GATE CLOSED — ticket has been revoked.")
+        print("=" * 52)
+        print()
+        print(f"  Reason: {ticket.get('revoked_reason', '—')}")
         print()
         return False
 
