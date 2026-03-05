@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="page-title">Access Your Stream</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+
+    :root {
+      --bg:       #0a0a0a;
+      --surface:  #111111;
+      --border:   #222222;
+      --text:     #e8e8e8;
+      --muted:    #555555;
+      --accent:   #c8f04a;
+      --danger:   #ff4444;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.4;
+    }
+
+    .wrap {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+    }
+
+    header .wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .back-link {
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color 0.15s;
+    }
+
+    .back-link:hover { color: var(--text); }
+
+    .hub-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* ── gate form ── */
+    .gate-form {
+      padding: 64px 0 40px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .gate-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(40px, 10vw, 64px);
+      line-height: 0.92;
+      margin-bottom: 12px;
+    }
+
+    .gate-title span { color: var(--accent); }
+
+    .gate-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 48px;
+      line-height: 1.8;
+    }
+
+    .field-group {
+      margin-bottom: 24px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .field-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      padding: 14px 16px;
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+
+    .field-input:focus { border-color: var(--accent); }
+    .field-input::placeholder { color: var(--muted); }
+
+    .field-hint {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--accent);
+      color: #0a0a0a;
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 18px;
+      border: none;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.15s, transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #0a0a0a;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    .btn-submit.loading .spinner { display: block; }
+    .btn-submit.loading .btn-text { opacity: 0.6; }
+
+    .msg {
+      margin-top: 16px;
+      font-size: 12px;
+      padding: 12px 16px;
+      display: none;
+      line-height: 1.8;
+    }
+
+    .msg.error {
+      background: #1a0000;
+      border: 1px solid #440000;
+      color: var(--danger);
+      display: block;
+    }
+
+    /* ── stream screen ── */
+    .stream-screen {
+      padding: 64px 0;
+      display: none;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .stream-screen.visible { display: block; }
+
+    .stream-check {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 80px;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .stream-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 40px;
+      margin-bottom: 24px;
+    }
+
+    .stream-detail {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 2;
+      margin-bottom: 40px;
+    }
+
+    .stream-detail span { color: var(--text); }
+
+    .stream-url-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .stream-url-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .stream-url-value {
+      font-size: 14px;
+      color: var(--accent);
+      word-break: break-all;
+    }
+
+    .stream-url-value a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .stream-url-value a:hover { text-decoration: underline; }
+
+    .copy-btn {
+      margin-top: 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .tbd-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--muted);
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .btn-link {
+      display: inline-block;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 12px 24px;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .btn-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    .hidden { display: none; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="wrap">
+      <a class="back-link" id="back-link" href="artist.html">← Back</a>
+      <span class="hub-label">Fan Portal</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+
+      <!-- gate form -->
+      <div class="gate-form" id="gate-form">
+        <h1 class="gate-title">Access your <span>stream.</span></h1>
+        <p class="gate-sub">
+          Enter your ticket ID and email.<br>
+          Your ticket ID was sent when you purchased.
+        </p>
+
+        <div class="field-group">
+          <label class="field-label" for="ticket-id">Ticket ID</label>
+          <input
+            class="field-input"
+            type="text"
+            id="ticket-id"
+            placeholder="TKT_XXXXXXXXXXXXXXXX"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="characters"
+            spellcheck="false"
+          />
+          <p class="field-hint">Starts with TKT_ — check your confirmation email.</p>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="fan-email">Your email</label>
+          <input
+            class="field-input"
+            type="email"
+            id="fan-email"
+            placeholder="fan@example.com"
+            autocomplete="email"
+          />
+          <p class="field-hint">Must match the email used at checkout.</p>
+        </div>
+
+        <button class="btn-submit" id="btn-verify" disabled>
+          <span class="spinner"></span>
+          <span class="btn-text">Verify ticket</span>
+        </button>
+
+        <div class="msg" id="msg"></div>
+      </div>
+
+      <!-- stream screen -->
+      <div class="stream-screen" id="stream-screen">
+        <div class="stream-check">✓</div>
+        <h2 class="stream-title">Binding holds.</h2>
+
+        <div class="stream-detail">
+          Ticket: <span id="result-ticket-id">—</span><br>
+          Email: <span id="result-email">—</span><br>
+          Act: <span id="result-act">—</span>
+        </div>
+
+        <div id="stream-url-block" class="stream-url-block hidden">
+          <p class="stream-url-label">Your stream</p>
+          <p class="stream-url-value">
+            <a id="stream-url-link" href="#" target="_blank" rel="noopener">—</a>
+          </p>
+          <button class="copy-btn" id="copy-btn">Copy link</button>
+        </div>
+
+        <div id="tbd-block" class="tbd-block hidden">
+          Stream URL not set yet. Check back closer to show time.<br>
+          Your ticket is valid and will work when the artist goes live.
+        </div>
+
+        <a class="btn-link" id="back-to-artist" href="artist.html">← Back to artist page</a>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // ------------------------------------------------------------------
+    // Gate — calls the backend verify endpoint
+    // Falls back to demo mode if no server
+    // ------------------------------------------------------------------
+
+    const params     = new URLSearchParams(window.location.search);
+    const configPath = params.get("config") || null;
+
+    // Back links
+    const backHref = configPath
+      ? `artist.html?config=${encodeURIComponent(configPath)}`
+      : "artist.html";
+    document.getElementById("back-link").href      = backHref;
+    document.getElementById("back-to-artist").href = backHref;
+
+    // Pre-fill ticket ID from URL param if present (e.g. from confirmation email link)
+    const preTicket = params.get("ticket");
+    const preEmail  = params.get("email");
+    if (preTicket) document.getElementById("ticket-id").value = preTicket;
+    if (preEmail)  document.getElementById("fan-email").value  = preEmail;
+
+    // ------------------------------------------------------------------
+    // Validation
+    // ------------------------------------------------------------------
+
+    function updateBtn() {
+      const tid   = document.getElementById("ticket-id").value.trim();
+      const email = document.getElementById("fan-email").value.trim();
+      const valid = tid.length > 4 && email.includes("@");
+      document.getElementById("btn-verify").disabled = !valid;
+    }
+
+    document.getElementById("ticket-id").addEventListener("input", updateBtn);
+    document.getElementById("fan-email").addEventListener("input", updateBtn);
+    updateBtn();
+
+    // ------------------------------------------------------------------
+    // Submit
+    // ------------------------------------------------------------------
+
+    document.getElementById("btn-verify").addEventListener("click", handleVerify);
+
+    async function handleVerify() {
+      const ticketId = document.getElementById("ticket-id").value.trim().toUpperCase();
+      const email    = document.getElementById("fan-email").value.trim().toLowerCase();
+
+      clearMsg();
+      setLoading(true);
+
+      try {
+        // Try real backend first
+        const res = await fetch("/verify-ticket", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ticket_id: ticketId, fan_email: email })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.valid) {
+            showStream(ticketId, email, data.act_name, data.stream_url);
+          } else {
+            setMsg(data.reason || "Ticket did not pass verification.", "error");
+          }
+        } else {
+          // Backend not running — demo mode
+          demoVerify(ticketId, email);
+        }
+      } catch (e) {
+        // No server — demo mode
+        demoVerify(ticketId, email);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function demoVerify(ticketId, email) {
+      // Demo: any TKT_ prefix passes
+      if (ticketId.startsWith("TKT_")) {
+        showStream(ticketId, email, "Hollow Coast", "TBD");
+      } else {
+        setMsg("Ticket not found. Make sure you entered the full ticket ID starting with TKT_", "error");
+      }
+    }
+
+    function showStream(ticketId, email, actName, streamUrl) {
+      document.getElementById("gate-form").classList.add("hidden");
+
+      document.getElementById("result-ticket-id").textContent = ticketId;
+      document.getElementById("result-email").textContent     = email;
+      document.getElementById("result-act").textContent       = actName || "—";
+
+      if (streamUrl && streamUrl !== "TBD") {
+        const block = document.getElementById("stream-url-block");
+        const link  = document.getElementById("stream-url-link");
+        block.classList.remove("hidden");
+        link.href        = streamUrl;
+        link.textContent = streamUrl;
+
+        document.getElementById("copy-btn").addEventListener("click", () => {
+          navigator.clipboard.writeText(streamUrl).then(() => {
+            document.getElementById("copy-btn").textContent = "Copied!";
+            setTimeout(() => {
+              document.getElementById("copy-btn").textContent = "Copy link";
+            }, 2000);
+          });
+        });
+      } else {
+        document.getElementById("tbd-block").classList.remove("hidden");
+      }
+
+      document.getElementById("stream-screen").classList.add("visible");
+    }
+
+    // ------------------------------------------------------------------
+    // Helpers
+    // ------------------------------------------------------------------
+
+    function setLoading(on) {
+      const btn = document.getElementById("btn-verify");
+      if (on) {
+        btn.classList.add("loading");
+        btn.disabled = true;
+      } else {
+        btn.classList.remove("loading");
+        updateBtn();
+      }
+    }
+
+    function setMsg(text, type) {
+      const el     = document.getElementById("msg");
+      el.textContent = text;
+      el.className   = "msg " + type;
+    }
+
+    function clearMsg() {
+      const el   = document.getElementById("msg");
+      el.className = "msg";
+      el.textContent = "";
+    }
+  </script>
+
+</body>
+</html>
