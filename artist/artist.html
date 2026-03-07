@@ -134,6 +134,53 @@
       margin-bottom: 24px;
     }
 
+    /* ── Bio ── */
+    .bio-text {
+      font-size: 14px;
+      line-height: 1.9;
+      color: var(--text);
+    }
+
+    /* ── Photo ── */
+    .artist-photo {
+      width: 100%;
+      max-height: 320px;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+      margin-bottom: 0;
+      filter: grayscale(20%);
+    }
+
+    /* ── Player ── */
+    #player-container {
+      position: relative;
+      width: 100%;
+      background: var(--surface);
+    }
+
+    #player-container iframe {
+      display: block;
+      width: 100%;
+      border: none;
+      background: var(--surface);
+      color-scheme: dark;
+    }
+
+    .player-fallback {
+      font-size: 13px;
+      color: var(--muted);
+      padding: 20px 0;
+    }
+
+    .player-fallback a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .player-fallback a:hover { text-decoration: underline; }
+
+    /* ── Ticket ── */
     .ticket-block {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -253,6 +300,7 @@
       transition: transform 0.15s ease;
     }
 
+    /* ── Calendar ── */
     .event-list {
       display: flex;
       flex-direction: column;
@@ -301,12 +349,75 @@
       color: var(--muted);
     }
 
+    .event-type-badge {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      display: inline-block;
+    }
+
     .no-events {
       font-size: 13px;
       color: var(--muted);
       font-style: italic;
     }
 
+    /* ── Related Artists ── */
+    .related-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    /* ── Sponsor ── */
+    #sponsor-section {
+      border-bottom: none;
+    }
+
+    .sponsor-block {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 20px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.15s;
+    }
+
+    .sponsor-block:hover {
+      border-color: var(--muted);
+    }
+
+    .sponsor-logo {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      flex-shrink: 0;
+      filter: grayscale(40%);
+    }
+
+    .sponsor-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sponsor-name {
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .sponsor-tagline {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ── Footer ── */
     footer {
       padding: 40px 0;
     }
@@ -389,9 +500,26 @@
           This hub is not yet live.
         </div>
 
+        <!-- Photo (optional) -->
+        <section id="photo-section" class="hidden" style="padding: 0; border-bottom: none;">
+          <img class="artist-photo" id="artist-photo" src="" alt="" />
+        </section>
+
         <section class="hero" style="border-bottom: none; padding-bottom: 0;">
           <h1 class="act-name" id="act-name">—</h1>
           <div class="hero-meta" id="hero-meta"></div>
+        </section>
+
+        <!-- Bio (optional) -->
+        <section id="bio-section" class="hidden">
+          <p class="section-label">About</p>
+          <p class="bio-text" id="bio-text"></p>
+        </section>
+
+        <!-- Music player -->
+        <section id="player-section" class="hidden">
+          <p class="section-label">Listen</p>
+          <div id="player-container"></div>
         </section>
 
         <section id="ticket-section">
@@ -430,6 +558,18 @@
           </div>
         </section>
 
+        <!-- Related Artists -->
+        <section id="related-section" class="hidden">
+          <p class="section-label">Recommended</p>
+          <div class="related-list link-row" id="related-list"></div>
+        </section>
+
+        <!-- Sponsor -->
+        <section id="sponsor-section" class="hidden">
+          <p class="section-label">Presented by</p>
+          <div id="sponsor-slot"></div>
+        </section>
+
       </div>
     </main>
 
@@ -450,6 +590,8 @@
       "_schema": "artist-hub-v1",
       "artist_name": "Hollow Coast",
       "act_name": "Hollow Coast",
+      "bio": "Hollow Coast makes music for late nights and long drives. Three albums in, still independent.",
+      "photo_url": "",
       "music_url": "https://bandcamp.com",
       "stream_url": "TBD",
       "merch_url": "https://bandcamp.com/merch",
@@ -461,10 +603,11 @@
       "hub_id": "HUB_4A9F2C81B3E7",
       "active": true,
       "events": [
-        { "date": "2026-04-12", "title": "Late Show",       "venue": "The Roxy, Los Angeles",   "url": "#" },
-        { "date": "2026-05-03", "title": "Spring Tour",     "venue": "Elsewhere, Brooklyn",     "url": "#" },
-        { "date": "2026-06-20", "title": "Summer Festival", "venue": "Prospect Park, New York", "url": "#" }
-      ]
+        { "date": "2026-04-12", "title": "Late Show",       "venue": "The Roxy, Los Angeles",   "url": "#", "type": "show" },
+        { "date": "2026-05-03", "title": "Spring Tour",     "venue": "Elsewhere, Brooklyn",     "url": "#", "type": "show" },
+        { "date": "2026-06-20", "title": "Summer Festival", "venue": "Prospect Park, New York", "url": "#", "type": "festival" }
+      ],
+      "related_artists": []
     };
 
     const params = new URLSearchParams(window.location.search);
@@ -474,9 +617,7 @@
     async function loadConfig() {
       try {
         const response = await fetch(activeConfigPath);
-        if (!response.ok) {
-          throw new Error("Config fetch failed");
-        }
+        if (!response.ok) throw new Error("Config fetch failed");
         return await response.json();
       } catch (error) {
         return DEMO_CONFIG;
@@ -484,9 +625,7 @@
     }
 
     function formatPrice(usd) {
-      if (usd === 0) {
-        return "FREE";
-      }
+      if (usd === 0) return "FREE";
       return "$" + Number(usd).toFixed(2);
     }
 
@@ -499,6 +638,96 @@
       `;
     }
 
+    // ------------------------------------------------------------------
+    // oEmbed player
+    // Detects Bandcamp or SoundCloud from the URL, fetches oEmbed JSON
+    // via a CORS proxy (allorigins), injects the iframe HTML.
+    // ------------------------------------------------------------------
+
+    async function loadPlayer(musicUrl) {
+      if (!musicUrl) return;
+
+      let oembedUrl = null;
+      if (musicUrl.includes("bandcamp.com")) {
+        oembedUrl = `https://bandcamp.com/oembed?url=${encodeURIComponent(musicUrl)}&format=json`;
+      } else if (musicUrl.includes("soundcloud.com")) {
+        oembedUrl = `https://soundcloud.com/oembed?url=${encodeURIComponent(musicUrl)}&format=json`;
+      }
+
+      if (!oembedUrl) return;
+
+      const section = document.getElementById("player-section");
+      const container = document.getElementById("player-container");
+
+      try {
+        // Fetch via allorigins to sidestep CORS restrictions
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(oembedUrl)}`;
+        const res = await fetch(proxyUrl);
+        if (!res.ok) throw new Error("proxy error");
+        const outer = await res.json();
+        const data = JSON.parse(outer.contents);
+        if (data.html) {
+          container.innerHTML = data.html;
+          // Force iframe to fill container width
+          const iframe = container.querySelector("iframe");
+          if (iframe) {
+            iframe.removeAttribute("width");
+            iframe.removeAttribute("height");
+            iframe.style.width = "100%";
+            // Bandcamp default height is reasonable; SoundCloud varies
+            if (!iframe.height || iframe.height < 100) {
+              iframe.style.height = "120px";
+            }
+          }
+          section.classList.remove("hidden");
+        }
+      } catch (e) {
+        // If oEmbed fails, show a plain link fallback
+        container.innerHTML = `<p class="player-fallback">
+          <a href="${musicUrl}" target="_blank" rel="noopener">Listen on ${musicUrl.includes("bandcamp") ? "Bandcamp" : "SoundCloud"} →</a>
+        </p>`;
+        section.classList.remove("hidden");
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // Sponsor slot
+    // ------------------------------------------------------------------
+
+    async function loadSponsor() {
+      try {
+        const res = await fetch("sponsor_config.json");
+        if (!res.ok) return;
+        const data = await res.json();
+        const s = data.sponsor;
+        if (!s || !s.active) return;
+
+        const section = document.getElementById("sponsor-section");
+        const slot = document.getElementById("sponsor-slot");
+
+        const img = s.image_url
+          ? `<img class="sponsor-logo" src="${s.image_url}" alt="${s.name}" />`
+          : "";
+
+        slot.innerHTML = `
+          <a class="sponsor-block" href="${s.url || '#'}" target="_blank" rel="noopener sponsored">
+            ${img}
+            <div class="sponsor-info">
+              <span class="sponsor-name">${s.name || ""}</span>
+              <span class="sponsor-tagline">${s.tagline || ""}</span>
+            </div>
+          </a>
+        `;
+        section.classList.remove("hidden");
+      } catch (e) {
+        // No sponsor config — silent
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // Main render
+    // ------------------------------------------------------------------
+
     function render(c) {
       document.getElementById("page-title").textContent = `${c.act_name} — Artist Hub`;
       document.getElementById("hub-id-display").textContent = c.hub_id || "";
@@ -507,39 +736,44 @@
         document.getElementById("inactive-banner").classList.remove("hidden");
       }
 
+      // Photo
+      if (c.photo_url) {
+        document.getElementById("artist-photo").src = c.photo_url;
+        document.getElementById("artist-photo").alt = c.act_name || "";
+        document.getElementById("photo-section").classList.remove("hidden");
+      }
+
+      // Act name — last word in accent colour
       const words = (c.act_name || "").trim().split(" ").filter(Boolean);
       const last = words.pop() || "";
       const rest = words.join(" ");
       const nameEl = document.getElementById("act-name");
-
       if (rest) {
         nameEl.innerHTML = `${rest} <span>${last}</span>`;
       } else {
         nameEl.innerHTML = `<span>${c.act_name || "—"}</span>`;
       }
 
+      // Hero meta
       const meta = document.getElementById("hero-meta");
       meta.innerHTML = "";
+      if (c.music_url) meta.innerHTML += metaItem("Music", `<a href="${c.music_url}" target="_blank" rel="noopener">Listen →</a>`);
+      if (c.stream_url && c.stream_url !== "TBD") meta.innerHTML += metaItem("Stream", `<a href="${c.stream_url}" target="_blank" rel="noopener">Watch →</a>`);
+      if (c.merch_url)  meta.innerHTML += metaItem("Merch", `<a href="${c.merch_url}" target="_blank" rel="noopener">Shop →</a>`);
 
-      if (c.music_url) {
-        meta.innerHTML += metaItem("Music", `<a href="${c.music_url}" target="_blank" rel="noopener">Listen →</a>`);
+      // Bio
+      if (c.bio) {
+        document.getElementById("bio-text").textContent = c.bio;
+        document.getElementById("bio-section").classList.remove("hidden");
       }
 
-      if (c.stream_url && c.stream_url !== "TBD") {
-        meta.innerHTML += metaItem("Stream", `<a href="${c.stream_url}" target="_blank" rel="noopener">Watch →</a>`);
-      }
-
-      if (c.merch_url) {
-        meta.innerHTML += metaItem("Merch", `<a href="${c.merch_url}" target="_blank" rel="noopener">Shop →</a>`);
-      }
-
+      // Tickets
       document.getElementById("ticket-price").textContent = formatPrice(c.ticket_price_usd);
       document.getElementById("ticket-details").innerHTML =
         `<span>${c.ticket_quantity}</span> tickets · <span>${c.purchase_limit_per_fan}</span> per fan`;
 
       const remaining = Number(c.ticket_quantity) || 0;
       const actionEl = document.getElementById("ticket-action");
-
       if (!c.active) {
         actionEl.innerHTML = `<p class="sold-out">Not on sale yet</p>`;
       } else if (remaining < 1) {
@@ -548,44 +782,72 @@
         actionEl.innerHTML = `<a class="btn" href="buy.html?config=${encodeURIComponent(activeConfigPath)}">Get tickets</a>`;
       }
 
+      // Music link
       if (c.music_url) {
         document.getElementById("music-link").href = c.music_url;
       }
 
+      // Merch
       if (c.merch_url) {
         document.getElementById("merch-section").classList.remove("hidden");
         document.getElementById("merch-link").href = c.merch_url;
       }
 
+      // Refund
       if (c.refund_policy) {
         document.getElementById("refund-display").textContent = c.refund_policy;
       }
 
+      // Events
       const events = Array.isArray(c.events) ? c.events : [];
       const listEl = document.getElementById("event-list");
-
       if (events.length > 0) {
         listEl.innerHTML = events.map((ev) => {
           const d = new Date(ev.date);
           const mon = d.toLocaleString("en-US", { month: "short" }).toUpperCase();
           const day = d.getDate();
-
+          const badge = ev.type && ev.type !== "show"
+            ? `<span class="event-type-badge">${ev.type}</span>`
+            : "";
           return `
             <a class="event-item" href="${ev.url || '#'}" target="_blank" rel="noopener">
               <div class="event-date">${mon}<br>${day}</div>
               <div class="event-info">
                 <span class="event-title">${ev.title || ''}</span>
                 <span class="event-venue">${ev.venue || ''}</span>
+                ${badge}
               </div>
             </a>
           `;
         }).join("");
       }
+
+      // Related artists
+      const related = Array.isArray(c.related_artists) ? c.related_artists : [];
+      if (related.length > 0) {
+        const relEl = document.getElementById("related-list");
+        relEl.innerHTML = related.map((a) => {
+          const href = a.url || a.music_url || "#";
+          return `
+            <a class="link-item" href="${href}" target="_blank" rel="noopener">
+              <span class="link-name">${a.act_name || "Unknown Artist"}</span>
+              <span class="link-arrow">→</span>
+            </a>
+          `;
+        }).join("");
+        document.getElementById("related-section").classList.remove("hidden");
+      }
     }
+
+    // ------------------------------------------------------------------
+    // Boot
+    // ------------------------------------------------------------------
 
     loadConfig()
       .then((config) => {
         render(config);
+        loadPlayer(config.music_url);
+        loadSponsor();
         document.getElementById("loading").classList.add("hidden");
         document.getElementById("app").classList.remove("hidden");
       })
@@ -596,4 +858,4 @@
   </script>
 
 </body>
-              </html>
+</html>

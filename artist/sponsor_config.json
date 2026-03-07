@@ -1,0 +1,10 @@
+{
+  "_note": "Platform-level sponsor slot. Controlled by platform operator, not artists.",
+  "sponsor": {
+    "name": "",
+    "url": "",
+    "image_url": "",
+    "tagline": "",
+    "active": false
+  }
+}

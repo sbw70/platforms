@@ -292,6 +292,115 @@
 
     .btn-link:hover { border-color: var(--accent); color: var(--accent); }
 
+    /* ── Favorites ── */
+    .favorites-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+
+    .fav-label {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .fav-artist-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .fav-artist-row:last-of-type { border-bottom: none; }
+
+    .fav-remove {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 0 4px;
+      transition: color 0.15s;
+    }
+
+    .fav-remove:hover { color: var(--danger); }
+
+    .fav-empty {
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+      padding: 8px 0 20px;
+    }
+
+    .fav-heart-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .fav-heart-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .fav-heart-btn.saved { border-color: var(--accent); color: var(--accent); }
+
+    .shuffle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #0a0a0a;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 12px 24px;
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+
+    .shuffle-btn:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
+    .shuffle-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+    /* mini player that appears after shuffle */
+    #shuffle-player {
+      margin-top: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 16px 20px;
+    }
+
+    #shuffle-player iframe {
+      display: block;
+      width: 100%;
+      border: none;
+    }
+
+    #shuffle-player .shuffle-now-label {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
     .hidden { display: none; }
 
     @keyframes fadeUp {
@@ -384,6 +493,29 @@
         </div>
 
         <a class="btn-link" id="back-to-artist" href="artist.html">← Back to artist page</a>
+
+        <!-- ── Favorites / shuffle ── -->
+        <div class="favorites-section" id="favorites-section">
+          <p class="fav-label">Your artists</p>
+
+          <!-- Save current artist button (shown after verification) -->
+          <button class="fav-heart-btn" id="fav-save-btn">♡ Save this artist</button>
+
+          <!-- List of saved artists -->
+          <div id="fav-list"></div>
+
+          <!-- Shuffle button -->
+          <div>
+            <button class="shuffle-btn" id="shuffle-btn" disabled>⇌ Shuffle</button>
+          </div>
+
+          <!-- Mini player for shuffled pick -->
+          <div id="shuffle-player" class="hidden">
+            <p class="shuffle-now-label">Now playing</p>
+            <div id="shuffle-player-inner"></div>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -475,6 +607,121 @@
       }
     }
 
+    // ------------------------------------------------------------------
+    // Favorites — localStorage-backed artist shuffle
+    // Storage key: "hub_favorites" → [{act_name, music_url}]
+    // ------------------------------------------------------------------
+
+    const FAV_KEY = "hub_favorites";
+
+    function getFavs() {
+      try { return JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); }
+      catch (e) { return []; }
+    }
+
+    function saveFavs(list) {
+      localStorage.setItem(FAV_KEY, JSON.stringify(list));
+    }
+
+    function renderFavList() {
+      const list = getFavs();
+      const el = document.getElementById("fav-list");
+      const shuffleBtn = document.getElementById("shuffle-btn");
+
+      if (list.length === 0) {
+        el.innerHTML = `<p class="fav-empty">No saved artists yet. Save artists you discover here.</p>`;
+        shuffleBtn.disabled = true;
+        return;
+      }
+
+      el.innerHTML = list.map((a, i) => `
+        <div class="fav-artist-row">
+          <span>${a.act_name}</span>
+          <button class="fav-remove" data-index="${i}" title="Remove">×</button>
+        </div>
+      `).join("");
+
+      el.querySelectorAll(".fav-remove").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const idx = parseInt(btn.dataset.index, 10);
+          const updated = getFavs();
+          updated.splice(idx, 1);
+          saveFavs(updated);
+          renderFavList();
+        });
+      });
+
+      shuffleBtn.disabled = list.length === 0;
+    }
+
+    function initFavorites(actName, musicUrl) {
+      renderFavList();
+
+      // Save button
+      const saveBtn = document.getElementById("fav-save-btn");
+      const favs = getFavs();
+      const alreadySaved = favs.some((a) => a.act_name === actName);
+      if (alreadySaved) {
+        saveBtn.textContent = "♥ Saved";
+        saveBtn.classList.add("saved");
+      }
+
+      saveBtn.addEventListener("click", () => {
+        const current = getFavs();
+        if (current.some((a) => a.act_name === actName)) return;
+        current.push({ act_name: actName, music_url: musicUrl || "" });
+        saveFavs(current);
+        saveBtn.textContent = "♥ Saved";
+        saveBtn.classList.add("saved");
+        renderFavList();
+      });
+
+      // Shuffle button
+      document.getElementById("shuffle-btn").addEventListener("click", () => {
+        const pool = getFavs().filter((a) => a.music_url);
+        if (pool.length === 0) return;
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        loadShufflePlayer(pick);
+      });
+    }
+
+    async function loadShufflePlayer(artist) {
+      const playerDiv = document.getElementById("shuffle-player");
+      const inner = document.getElementById("shuffle-player-inner");
+      inner.innerHTML = `<p style="font-size:12px;color:var(--muted)">Loading ${artist.act_name}...</p>`;
+      playerDiv.classList.remove("hidden");
+
+      const mu = artist.music_url;
+      let oembedUrl = null;
+      if (mu.includes("bandcamp.com")) {
+        oembedUrl = `https://bandcamp.com/oembed?url=${encodeURIComponent(mu)}&format=json`;
+      } else if (mu.includes("soundcloud.com")) {
+        oembedUrl = `https://soundcloud.com/oembed?url=${encodeURIComponent(mu)}&format=json`;
+      }
+
+      if (!oembedUrl) {
+        inner.innerHTML = `<p style="font-size:12px;color:var(--muted)"><a href="${mu}" target="_blank" rel="noopener" style="color:var(--accent)">${artist.act_name} →</a></p>`;
+        return;
+      }
+
+      try {
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(oembedUrl)}`;
+        const res = await fetch(proxyUrl);
+        const outer = await res.json();
+        const data = JSON.parse(outer.contents);
+        if (data.html) {
+          inner.innerHTML = data.html;
+          const iframe = inner.querySelector("iframe");
+          if (iframe) {
+            iframe.removeAttribute("width");
+            iframe.style.width = "100%";
+          }
+        }
+      } catch (e) {
+        inner.innerHTML = `<p style="font-size:12px;color:var(--muted)"><a href="${mu}" target="_blank" rel="noopener" style="color:var(--accent)">${artist.act_name} →</a></p>`;
+      }
+    }
+
     function showStream(ticketId, email, actName, streamUrl) {
       document.getElementById("gate-form").classList.add("hidden");
 
@@ -502,6 +749,43 @@
       }
 
       document.getElementById("stream-screen").classList.add("visible");
+
+      // Boot favorites system with this artist's info
+      // music_url is not in the verify response, so we pull it from configPath if available
+      const favMusicUrl = "";   // extended in loadArtistMusicUrl below
+      initFavorites(actName, favMusicUrl);
+      loadArtistMusicUrl(actName);
+    }
+
+    // Try to pull music_url from the artist config so saved artists have a playable URL
+    async function loadArtistMusicUrl(actName) {
+      if (!configPath) return;
+      try {
+        const res = await fetch(configPath);
+        if (!res.ok) return;
+        const cfg = await res.json();
+        if (cfg.music_url) {
+          // Update the save button's closure with the real URL
+          const saveBtn = document.getElementById("fav-save-btn");
+          saveBtn.replaceWith(saveBtn.cloneNode(true)); // reset listener
+          const newBtn = document.getElementById("fav-save-btn");
+          const favs = getFavs();
+          const alreadySaved = favs.some((a) => a.act_name === actName);
+          if (alreadySaved) {
+            newBtn.textContent = "♥ Saved";
+            newBtn.classList.add("saved");
+          }
+          newBtn.addEventListener("click", () => {
+            const current = getFavs();
+            if (current.some((a) => a.act_name === actName)) return;
+            current.push({ act_name: actName, music_url: cfg.music_url });
+            saveFavs(current);
+            newBtn.textContent = "♥ Saved";
+            newBtn.classList.add("saved");
+            renderFavList();
+          });
+        }
+      } catch (e) { /* silent */ }
     }
 
     // ------------------------------------------------------------------
