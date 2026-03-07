@@ -6,6 +6,12 @@
   "act_name": "",
   "contact_email": "",
 
+  "bio": "",
+  "_bio_note": "2-3 sentences shown on your hub page. Optional.",
+
+  "photo_url": "",
+  "_photo_note": "URL to a profile or press photo. Optional.",
+
   "music_url": "",
   "stream_url": "",
   "merch_url": "",
@@ -25,5 +31,26 @@
   "_hub_note": "Assigned at registration. Artist does not set this.",
 
   "active": false,
-  "_active_note": "Set to true by artist when ready to go live."
+  "_active_note": "Set to true when ready to go live.",
+
+  "events": [
+    {
+      "date": "",
+      "title": "",
+      "venue": "",
+      "url": "",
+      "type": "show",
+      "_type_note": "show | stream | festival"
+    }
+  ],
+  "_events_note": "List your upcoming shows. Leave the array empty ([]) if none.",
+
+  "related_artists": [
+    {
+      "act_name": "",
+      "url": "",
+      "music_url": ""
+    }
+  ],
+  "_related_note": "Up to 10 artists you recommend to your fans. url = their hub or site, music_url = Bandcamp/SoundCloud for in-app playback."
 }
