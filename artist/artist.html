@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title id="page-title">Artist Hub</title>
+  <title id="page-title">The Flyer</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
 
@@ -488,7 +488,7 @@
 
     <header>
       <div class="wrap">
-        <span class="hub-label">Artist Hub</span>
+        <span class="hub-label">The Flyer</span>
         <span class="hub-id" id="hub-id-display"></span>
       </div>
     </header>
@@ -587,7 +587,7 @@
 
   <script>
     const DEMO_CONFIG = {
-      "_schema": "artist-hub-v1",
+      "_schema": "the flyer-v1",
       "artist_name": "Hollow Coast",
       "act_name": "Hollow Coast",
       "bio": "Hollow Coast makes music for late nights and long drives. Three albums in, still independent.",
@@ -729,7 +729,7 @@
     // ------------------------------------------------------------------
 
     function render(c) {
-      document.getElementById("page-title").textContent = `${c.act_name} — Artist Hub`;
+      document.getElementById("page-title").textContent = `${c.act_name} —  The Flyer`;
       document.getElementById("hub-id-display").textContent = c.hub_id || "";
 
       if (!c.active) {

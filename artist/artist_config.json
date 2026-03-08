@@ -1,28 +1,27 @@
 {
-  "_schema": "artist-hub-v1",
+  "_schema": "The Flyer-v1",
   "_note": "This file is owned and controlled by the artist. The platform reads it. Nothing else.",
 
-  "artist_name": "",
-  "act_name": "",
-  "contact_email": "",
+  "artist_name": "Municipal Waste",
+  "act_name": "Municipal Waste",
+  "contact_email": "contact@municipalwaste.com",
 
   "bio": "",
-  "_bio_note": "2-3 sentences shown on your hub page. Optional.",
+  "_bio_note": "Thrash Metal",
 
   "photo_url": "",
   "_photo_note": "URL to a profile or press photo. Optional.",
+  "music_url": "https://municipal-waste.bandcamp.com/track/electrified-brain-2",
+  "stream_url": "https://instagram.com",
+  "merch_url": "https://municipal-waste.bandcamp.com/merch",
 
-  "music_url": "",
-  "stream_url": "",
-  "merch_url": "",
+  "ticket_price_usd": 20.00,
+  "ticket_quantity": 350,
+  "purchase_limit_per_fan": 6,
 
-  "ticket_price_usd": 0.00,
-  "ticket_quantity": 0,
-  "purchase_limit_per_fan": 2,
+  "refund_policy": "Conditions Apply",
 
-  "refund_policy": "",
-
-  "stripe_account_id": "",
+  "stripe_account_id": "https://stripe.com",
 
   "platform_fee_pct": 2.0,
   "_fee_note": "2% covers Stripe passthrough and infra. Artist receives the rest.",
@@ -30,15 +29,23 @@
   "hub_id": "",
   "_hub_note": "Assigned at registration. Artist does not set this.",
 
-  "active": false,
+  "active": true,
   "_active_note": "Set to true when ready to go live.",
 
   "events": [
     {
-      "date": "",
-      "title": "",
-      "venue": "",
-      "url": "",
+      "date": "10/16/2026",
+      "title": "Grabage In, Garbage Out",
+      "venue": "Groundzero, Spartanburg, SC",
+      "url": "https://municipalwaste.com/live",
+      "type": "show",
+      "_type_note": "show | stream | festival"
+    },
+    {
+      "date": "10/17/2026",
+      "title": "Grabage In, Garbage Out",
+      "venue": "The Roxy, Atlanta, GA",
+      "url": "https://municipalwaste.com/live",
       "type": "show",
       "_type_note": "show | stream | festival"
     }
@@ -47,9 +54,9 @@
 
   "related_artists": [
     {
-      "act_name": "",
-      "url": "",
-      "music_url": ""
+      "act_name": "Down",
+      "url": "https://Down.com",
+      "music_url": "https://bandcamp.com"
     }
   ],
   "_related_note": "Up to 10 artists you recommend to your fans. url = their hub or site, music_url = Bandcamp/SoundCloud for in-app playback."
